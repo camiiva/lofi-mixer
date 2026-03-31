@@ -567,6 +567,22 @@ const AudioEngine = (() => {
     { time: '3:0:0', notes: ['E3', 'G3', 'B3', 'D4'], dur: '1m' },
   ];
 
+  // Am7 → Fmaj7 → Cmaj7 → Em7, each held 2 bars (8m loop)
+  const DRIFT_EVENTS = [
+    { time: '0:0:0', notes: ['A2', 'E3', 'A3', 'C4', 'E4', 'G4'], dur: '2m' },
+    { time: '2:0:0', notes: ['F2', 'C3', 'F3', 'A3', 'C4', 'E4'], dur: '2m' },
+    { time: '4:0:0', notes: ['C2', 'G2', 'C3', 'E3', 'G3', 'B3'], dur: '2m' },
+    { time: '6:0:0', notes: ['E2', 'B2', 'E3', 'G3', 'B3', 'D4'], dur: '2m' },
+  ];
+
+  // Same progression an octave up for the crystal shimmer
+  const CRYSTAL_EVENTS = [
+    { time: '0:0:0', notes: ['A4', 'C5', 'E5', 'G5'], dur: '1m' },
+    { time: '1:0:0', notes: ['F4', 'A4', 'C5', 'E5'], dur: '1m' },
+    { time: '2:0:0', notes: ['C4', 'E4', 'G4', 'B4'], dur: '1m' },
+    { time: '3:0:0', notes: ['E4', 'G4', 'B4', 'D5'], dur: '1m' },
+  ];
+
   const GUITAR_EVENTS = [
     // Am - bar 0
     { time: '0:0:0', note: 'A2' }, { time: '0:0:2', note: 'E3' },
@@ -673,6 +689,85 @@ const AudioEngine = (() => {
     };
   }
 
+  function makeDriftPad() {
+    // Deep sine drone — slow AutoFilter breath, lush chorus, 8-bar loop
+    const synth = new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: 'sine' },
+      envelope: { attack: 2.8, decay: 0.4, sustain: 0.95, release: 5.0 },
+      volume: -16,
+    });
+
+    const autoFilter = new Tone.AutoFilter({ frequency: 0.04, baseFrequency: 250, octaves: 1.8, wet: 0.8 });
+    const chorus     = new Tone.Chorus({ frequency: 0.18, delayTime: 14, depth: 0.7, wet: 0.75 });
+    const merge      = new Tone.Gain(1);
+    synth.chain(autoFilter, chorus, merge);
+
+    const part = new Tone.Part((time, { notes, dur }) => {
+      synth.triggerAttackRelease(notes, dur, time, vel(0.6, 0.1));
+    }, DRIFT_EVENTS);
+    part.loop    = true;
+    part.loopEnd = '8m';
+
+    return {
+      output: merge,
+      start()   { autoFilter.start(); chorus.start(); part.start(0); },
+      stop()    { part.stop(); },
+      dispose() { part.dispose(); synth.dispose(); autoFilter.dispose(); chorus.dispose(); merge.dispose(); },
+    };
+  }
+
+  function makePulsePad() {
+    // Square wave with slow tremolo heartbeat — punchy and lo-fi
+    const synth = new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: 'square' },
+      envelope: { attack: 0.2, decay: 0.4, sustain: 0.65, release: 1.8 },
+      volume: -20,
+    });
+
+    const filter  = new Tone.Filter({ type: 'lowpass', frequency: 800, Q: 1.2 });
+    const tremolo = new Tone.Tremolo({ frequency: 1.2, depth: 0.45, wet: 0.7 });
+    const chorus  = new Tone.Chorus({ frequency: 0.5, delayTime: 7, depth: 0.4, wet: 0.5 });
+    const merge   = new Tone.Gain(1);
+    synth.chain(filter, tremolo, chorus, merge);
+
+    const part = makePart(PAD_EVENTS, (time, { notes, dur }) => {
+      synth.triggerAttackRelease(notes, dur, time, vel(0.7, 0.18));
+    });
+
+    return {
+      output: merge,
+      start()   { tremolo.start(); chorus.start(); part.start(0); },
+      stop()    { part.stop(); },
+      dispose() { part.dispose(); synth.dispose(); filter.dispose(); tremolo.dispose(); chorus.dispose(); merge.dispose(); },
+    };
+  }
+
+  function makeCrystalPad() {
+    // High-register triangle + PingPong delay — airy shimmer
+    const synth = new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: 'triangle' },
+      envelope: { attack: 0.9, decay: 0.3, sustain: 0.55, release: 3.5 },
+      volume: -20,
+    });
+    synth.set({ detune: 8 });
+
+    const delay  = new Tone.PingPongDelay({ delayTime: '8n', feedback: 0.28, wet: 0.32 });
+    const chorus = new Tone.Chorus({ frequency: 1.8, delayTime: 5, depth: 0.45, wet: 0.55 });
+    const merge  = new Tone.Gain(1);
+    synth.chain(chorus, delay, merge);
+
+    const part = makePart(CRYSTAL_EVENTS, (time, { notes, dur }) => {
+      synth.triggerAttackRelease(notes, dur, time, vel(0.65, 0.16));
+    });
+
+    return {
+      output: merge,
+      start()   { chorus.start(); part.start(0); },
+      stop()    { part.stop(); },
+      dispose() { part.dispose(); synth.dispose(); delay.dispose(); chorus.dispose(); merge.dispose(); },
+    };
+  }
+
   function makePluckGuitar() {
     // Karplus-Strong string synthesis
     const pluck = new Tone.PluckSynth({
@@ -712,24 +807,32 @@ const AudioEngine = (() => {
       'none':        null,
     },
     texture:  { 'vinyl-crackle': makeVinylCrackleSynth, 'tape-hiss': makeTapeHissSynth, none: null },
-    instrumental: { piano: makeLoFiPiano, 'e-piano': makeEPiano, pad: makeSynthPad, guitar: makePluckGuitar, none: null },
+    instrumental: { piano: makeLoFiPiano, 'e-piano': makeEPiano, pad: makeSynthPad, 'drift-pad': makeDriftPad, 'pulse-pad': makePulsePad, 'crystal-pad': makeCrystalPad, guitar: makePluckGuitar, none: null },
   };
 
   const initialVolumes = { ambiance: 70, beats: 60, texture: 40, instrumental: 55 };
 
   // ---------- Public API ----------
 
-  async function init(sourceKeys) {
-    masterFilter = new Tone.Filter({ type: 'lowpass', frequency: warmthToFreq(55), rolloff: -12 });
-    masterReverb = new Tone.Reverb({ decay: 3.5, wet: 0.30 });
-    await masterReverb.ready;
-    masterFilter.chain(masterReverb, Tone.Destination);
+  async function init(sourceKeys, onStep) {
+    const step = onStep || (() => {});
 
+    step('BUILDING FX CHAIN...');
+    masterFilter = new Tone.Filter({ type: 'lowpass', frequency: warmthToFreq(55), rolloff: -12 });
+
+    // Use a plain Gain as a pass-through — eliminates all reverb node overhead.
+    // Keeps the chain simple while we debug mobile audio.
+    masterReverb = new Tone.Gain(1);
+    masterFilter.chain(masterReverb);
+    masterReverb.connect(Tone.context.rawContext.destination);
+
+    step('LOADING CHANNELS...');
     for (const [name, key] of Object.entries(sourceKeys)) {
       const vol = new Tone.Volume(toDB(initialVolumes[name] ?? 50));
       vol.connect(masterFilter);
       channels[name].volume = vol;
 
+      step(`LOADING ${name.toUpperCase()}...`);
       const factory = factories[name]?.[key];
       if (factory) {
         channels[name].synth = factory();
@@ -777,7 +880,7 @@ const AudioEngine = (() => {
   }
 
   function setReverb(val) {
-    if (masterReverb) masterReverb.wet.rampTo(val / 100, 0.15);
+    if (masterReverb) masterReverb.gain.rampTo(val / 100 * 0.8 + 0.2, 0.15);
   }
 
   function setBPM(val) {

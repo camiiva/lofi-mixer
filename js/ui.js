@@ -74,27 +74,54 @@
 
   // ---------- Play ----------
   playBtn.addEventListener('click', () => {
-    // Step 1: Unlock Web Audio synchronously — MUST be the first call,
-    // with no await before it. iOS only honours user-gesture trust here.
-    Tone.start();
-
+    if (playBtn.disabled) return;
     playBtn.disabled = true;
 
+    if (!(window.AudioContext || window.webkitAudioContext)) {
+      setStatus('ERR: NO WEB AUDIO API');
+      playBtn.disabled = false;
+      return;
+    }
+
+    // SYNCHRONOUS — iOS only grants Web Audio unlock during the synchronous
+    // part of a user-gesture handler. Call Tone.start() here (one context
+    // only — creating a second AudioContext in the same gesture can prevent
+    // iOS from unlocking Tone's context).
+    const toneReady = Tone.start();
+
+    setStatus('UNLOCKING...');
+    // ── END SYNCHRONOUS SECTION ──────────────────────────────────────
+
     const run = async () => {
+      try {
+        await toneReady;
+      } catch (e) {
+        setStatus('ERR TONE-START: ' + e.message);
+        playBtn.disabled = false;
+        return;
+      }
+
+      setStatus('CTX:' + Tone.context.state + ' LOADING...');
+
       if (!audioReady) {
-        setStatus('LOADING...');
         try {
-          await AudioEngine.init(currentSources());
+          await AudioEngine.init(currentSources(), setStatus);
           audioReady = true;
         } catch (e) {
-          console.error('[ui] init failed:', e);
-          setStatus('ERR: INIT FAILED');
+          setStatus('ERR INIT: ' + (e && e.message ? e.message : String(e)));
           playBtn.disabled = false;
           return;
         }
       }
 
-      AudioEngine.play();
+      try {
+        AudioEngine.play();
+      } catch (e) {
+        setStatus('ERR PLAY: ' + (e && e.message ? e.message : String(e)));
+        playBtn.disabled = false;
+        return;
+      }
+
       playBtn.classList.add('active');
       stopBtn.disabled = false;
       startTick();
@@ -155,6 +182,102 @@
     swingSlider.style.setProperty('--fill', `${(val / 66) * 100}%`);
     AudioEngine.setSwing(val);
   });
+
+  // ---------- Custom select dropdowns ----------
+  function initCustomSelects() {
+    document.querySelectorAll('select.ch-select').forEach(select => {
+      const wrap = document.createElement('div');
+      wrap.className = 'custom-select-wrap';
+
+      const trigger = document.createElement('div');
+      trigger.className = 'custom-select-trigger';
+      trigger.setAttribute('tabindex', '0');
+      trigger.setAttribute('role', 'button');
+      trigger.setAttribute('aria-haspopup', 'listbox');
+      trigger.setAttribute('aria-expanded', 'false');
+      trigger.setAttribute('aria-label', select.getAttribute('aria-label') || '');
+
+      const valueSpan = document.createElement('span');
+      valueSpan.className = 'custom-select-value';
+      valueSpan.textContent = select.options[select.selectedIndex]?.text || '';
+
+      const arrow = document.createElement('span');
+      arrow.className = 'custom-select-arrow';
+      arrow.textContent = '▼';
+      arrow.setAttribute('aria-hidden', 'true');
+
+      trigger.appendChild(valueSpan);
+      trigger.appendChild(arrow);
+
+      const optList = document.createElement('ul');
+      optList.className = 'custom-select-options';
+      optList.setAttribute('role', 'listbox');
+
+      Array.from(select.options).forEach((opt, i) => {
+        const li = document.createElement('li');
+        const isSelected = i === select.selectedIndex;
+        li.className = 'custom-select-option' + (isSelected ? ' selected' : '');
+        li.textContent = opt.text;
+        li.dataset.value = opt.value;
+        li.setAttribute('role', 'option');
+        li.setAttribute('aria-selected', String(isSelected));
+
+        li.addEventListener('click', () => {
+          select.value = opt.value;
+          valueSpan.textContent = opt.text;
+          optList.querySelectorAll('.custom-select-option').forEach(el => {
+            el.classList.remove('selected');
+            el.setAttribute('aria-selected', 'false');
+          });
+          li.classList.add('selected');
+          li.setAttribute('aria-selected', 'true');
+          wrap.classList.remove('open');
+          trigger.setAttribute('aria-expanded', 'false');
+          select.dispatchEvent(new Event('change'));
+        });
+
+        optList.appendChild(li);
+      });
+
+      function closeDropdown() {
+        wrap.classList.remove('open');
+        trigger.setAttribute('aria-expanded', 'false');
+      }
+
+      trigger.addEventListener('click', e => {
+        e.stopPropagation();
+        const isOpen = wrap.classList.contains('open');
+        document.querySelectorAll('.custom-select-wrap.open').forEach(w => {
+          w.classList.remove('open');
+          w.querySelector('.custom-select-trigger')?.setAttribute('aria-expanded', 'false');
+        });
+        if (!isOpen) {
+          wrap.classList.add('open');
+          trigger.setAttribute('aria-expanded', 'true');
+        }
+      });
+
+      trigger.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); trigger.click(); }
+        else if (e.key === 'Escape') closeDropdown();
+      });
+
+      select.parentNode.insertBefore(wrap, select);
+      select.style.display = 'none';
+      wrap.appendChild(trigger);
+      wrap.appendChild(optList);
+      wrap.appendChild(select);
+    });
+
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.custom-select-wrap.open').forEach(w => {
+        w.classList.remove('open');
+        w.querySelector('.custom-select-trigger')?.setAttribute('aria-expanded', 'false');
+      });
+    });
+  }
+
+  initCustomSelects();
 
   // ---------- Source selects ----------
   function bindSourceSelect(select, channelName) {
