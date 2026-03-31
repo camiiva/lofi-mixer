@@ -1,0 +1,191 @@
+/* ============================================================
+   LOFI.MIXER — effects.css
+   VHS overlay effects: scanlines, vignette, noise, glitch, flicker
+   ============================================================ */
+
+/* ---------- Scanlines ---------- */
+.scanlines {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 0, 0, 0.18) 2px,
+    rgba(0, 0, 0, 0.18) 4px
+  );
+}
+
+/* ---------- CRT vignette ---------- */
+.vignette {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 8999;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 55%,
+    rgba(0, 0, 0, 0.65) 100%
+  );
+}
+
+/* ---------- Noise texture ---------- */
+.noise {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 8998;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  animation: noise-drift 8s steps(2) infinite;
+}
+
+@keyframes noise-drift {
+  0%   { background-position: 0 0; }
+  25%  { background-position: 30px -15px; }
+  50%  { background-position: -20px 40px; }
+  75%  { background-position: 10px 20px; }
+  100% { background-position: 0 0; }
+}
+
+/* ---------- CRT body flicker ---------- */
+body {
+  animation: crt-flicker 8s ease-in-out infinite;
+}
+
+@keyframes crt-flicker {
+  0%, 95%, 100% { opacity: 1; }
+  96%            { opacity: 0.94; }
+  97%            { opacity: 1; }
+  98%            { opacity: 0.96; }
+}
+
+/* ---------- Glitch title ---------- */
+.glitch-title {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+/* Pseudo-element clones for chromatic glitch slices */
+.glitch-title::before,
+.glitch-title::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  opacity: 0;
+}
+
+.glitch-title::before {
+  color: #ff2d78;
+  left: -2px;
+}
+
+.glitch-title::after {
+  color: #00fff0;
+  left: 2px;
+}
+
+/* Active glitch state — triggered by JS adding .is-glitching */
+.glitch-title.is-glitching::before {
+  opacity: 0.8;
+  animation: glitch-slice-1 0.18s steps(1) forwards;
+}
+
+.glitch-title.is-glitching::after {
+  opacity: 0.7;
+  animation: glitch-slice-2 0.18s steps(1) forwards;
+}
+
+.glitch-title.is-glitching {
+  animation: glitch-main 0.18s steps(1) forwards;
+}
+
+@keyframes glitch-main {
+  0%   { clip-path: inset(0 0 85% 0); transform: translateX(-3px); }
+  20%  { clip-path: inset(40% 0 40% 0); transform: translateX(3px); }
+  40%  { clip-path: inset(70% 0 10% 0); transform: translateX(-2px); }
+  60%  { clip-path: inset(20% 0 60% 0); transform: translateX(2px); }
+  80%  { clip-path: inset(50% 0 5% 0);  transform: translateX(-1px); }
+  100% { clip-path: none; transform: none; }
+}
+
+@keyframes glitch-slice-1 {
+  0%   { clip-path: inset(10% 0 80% 0); transform: translateX(-4px); }
+  33%  { clip-path: inset(50% 0 30% 0); transform: translateX(3px); }
+  66%  { clip-path: inset(75% 0 5% 0);  transform: translateX(-2px); }
+  100% { clip-path: none; transform: none; opacity: 0; }
+}
+
+@keyframes glitch-slice-2 {
+  0%   { clip-path: inset(60% 0 20% 0); transform: translateX(4px); }
+  33%  { clip-path: inset(20% 0 60% 0); transform: translateX(-3px); }
+  66%  { clip-path: inset(5% 0 80% 0);  transform: translateX(2px); }
+  100% { clip-path: none; transform: none; opacity: 0; }
+}
+
+/* ---------- Horizontal tracking glitch ---------- */
+/* Triggered on random channel rows by JS adding .is-tracking */
+.channel-row.is-tracking {
+  animation: tracking-glitch 0.12s steps(1) forwards;
+}
+
+@keyframes tracking-glitch {
+  0%   { transform: translateX(-4px); filter: brightness(1.4); }
+  33%  { transform: translateX(3px);  filter: brightness(0.8); }
+  66%  { transform: translateX(-1px); filter: brightness(1.1); }
+  100% { transform: none; filter: none; }
+}
+
+/* ---------- Neon glow pulse on active play ---------- */
+.transport-btn--play.active {
+  animation: play-pulse 2s ease-in-out infinite;
+}
+
+@keyframes play-pulse {
+  0%, 100% { box-shadow: 0 0 18px var(--green), 0 0 40px rgba(200, 255, 0, 0.25); }
+  50%       { box-shadow: 0 0 28px var(--green), 0 0 60px rgba(200, 255, 0, 0.4); }
+}
+
+/* ---------- VHS header shimmer line ---------- */
+.vhs-divider {
+  position: relative;
+  overflow: hidden;
+}
+
+.vhs-divider::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  transform: translateX(-100%);
+  animation: shimmer 4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* ---------- Channel border flicker on hover ---------- */
+.channel-row:hover {
+  animation: border-flicker 0.4s steps(2) forwards;
+}
+
+@keyframes border-flicker {
+  0%   { border-left-width: 3px; }
+  33%  { border-left-width: 5px; }
+  66%  { border-left-width: 2px; }
+  100% { border-left-width: 3px; }
+}

@@ -1,0 +1,415 @@
+/* ============================================================
+   LOFI.MIXER — style.css
+   VHS / Y2K aesthetic
+   ============================================================ */
+
+/* ---------- Reset & base ---------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg:        #080810;
+  --surface:   #0d0d1a;
+  --border:    #1a1a38;
+  --pink:      #ff2d78;
+  --cyan:      #00fff0;
+  --green:     #c8ff00;
+  --text:      #e8e8ff;
+  --text-dim:  #7878a8;
+  --font:      'VT323', monospace;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 20px;
+  letter-spacing: 0.04em;
+  overflow-x: hidden;
+}
+
+/* ---------- Screen wrapper ---------- */
+.vhs-screen {
+  position: relative;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 28px 32px 32px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ---------- Header ---------- */
+.vhs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0 12px;
+  gap: 12px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-width: 140px;
+}
+
+.rec-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--pink);
+  font-size: 1.1rem;
+  letter-spacing: 0.1em;
+}
+
+.rec-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--pink);
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+
+.rec-dot.blink {
+  animation: rec-blink 1s step-end infinite;
+}
+
+@keyframes rec-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+.timestamp {
+  color: var(--cyan);
+  font-size: 1.3rem;
+  letter-spacing: 0.12em;
+  min-width: 60px;
+  font-variant-numeric: tabular-nums;
+}
+
+.header-right {
+  min-width: 80px;
+  text-align: right;
+}
+
+.version-tag {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  letter-spacing: 0.15em;
+}
+
+/* ---------- Title ---------- */
+.glitch-title {
+  font-size: 2.8rem;
+  letter-spacing: 0.18em;
+  text-align: center;
+  color: var(--text);
+  text-shadow:
+    -2px 0 var(--pink),
+     2px 0 var(--cyan);
+  position: relative;
+  flex: 1;
+  user-select: none;
+}
+
+/* ---------- Dividers ---------- */
+.vhs-divider {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--pink) 20%,
+    var(--cyan) 80%,
+    transparent
+  );
+  margin: 12px 0;
+  opacity: 0.6;
+}
+
+.channel-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 8px 0;
+}
+
+/* ---------- Subtitle ---------- */
+.subtitle {
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 0.95rem;
+  letter-spacing: 0.25em;
+  margin-bottom: 20px;
+}
+
+/* ---------- Channel rows ---------- */
+.channels {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.channel-row {
+  display: grid;
+  grid-template-columns: 48px 110px 168px 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--pink);
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.channel-row:hover {
+  background: #111124;
+  border-left-color: var(--cyan);
+}
+
+.channel-row--fx {
+  border-left-color: var(--text-dim);
+  opacity: 0.85;
+}
+
+.channel-row--fx:hover {
+  border-left-color: var(--green);
+  opacity: 1;
+}
+
+.ch-label {
+  color: var(--pink);
+  font-size: 0.95rem;
+  letter-spacing: 0.1em;
+}
+
+.channel-row--fx .ch-label {
+  color: var(--text-dim);
+}
+
+.ch-name {
+  color: var(--cyan);
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.channel-row--fx .ch-name {
+  color: var(--text-dim);
+}
+
+/* ---------- Select ---------- */
+.ch-select {
+  appearance: none;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--pink);
+  padding: 4px 28px 4px 10px;
+  font-family: var(--font);
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  width: 100%;
+  /* Custom arrow using SVG */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath fill='%23ff2d78' d='M0 0l6 8 6-8z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.ch-select:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan);
+}
+
+.ch-select option {
+  background: #0d0d1a;
+  color: var(--text);
+}
+
+/* Label variant (no dropdown) */
+.ch-select--label {
+  display: flex;
+  align-items: center;
+  border-color: var(--border);
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  background-image: none;
+  cursor: default;
+  padding: 4px 10px;
+}
+
+/* ---------- Range sliders ---------- */
+.slider-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.ch-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: linear-gradient(
+    to right,
+    var(--pink) 0%,
+    var(--pink) var(--fill, 50%),
+    var(--border) var(--fill, 50%),
+    var(--border) 100%
+  );
+  outline: none;
+  border: none;
+  cursor: pointer;
+}
+
+.ch-slider--fx {
+  background: linear-gradient(
+    to right,
+    var(--green) 0%,
+    var(--green) var(--fill, 50%),
+    var(--border) var(--fill, 50%),
+    var(--border) 100%
+  );
+}
+
+/* Thumb — WebKit */
+.ch-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  background: var(--pink);
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 6px var(--pink);
+  cursor: pointer;
+}
+
+.ch-slider--fx::-webkit-slider-thumb {
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+}
+
+/* Thumb — Firefox */
+.ch-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: var(--pink);
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 6px var(--pink);
+  cursor: pointer;
+  border-radius: 0;
+}
+
+.ch-slider--fx::-moz-range-thumb {
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+}
+
+/* ---------- Transport ---------- */
+.transport {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin: 20px 0 12px;
+}
+
+.transport-btn {
+  font-family: var(--font);
+  font-size: 1.3rem;
+  letter-spacing: 0.14em;
+  padding: 10px 36px;
+  border: 2px solid;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s, color 0.15s;
+  min-width: 140px;
+  text-align: center;
+}
+
+.transport-btn--play {
+  color: var(--green);
+  border-color: var(--green);
+}
+
+.transport-btn--play:hover:not(:disabled),
+.transport-btn--play.active {
+  background: var(--green);
+  color: var(--bg);
+  box-shadow: 0 0 18px var(--green), 0 0 40px rgba(200, 255, 0, 0.25);
+}
+
+.transport-btn--stop {
+  color: var(--pink);
+  border-color: var(--pink);
+}
+
+.transport-btn--stop:hover:not(:disabled) {
+  background: var(--pink);
+  color: var(--bg);
+  box-shadow: 0 0 18px var(--pink), 0 0 40px rgba(255, 45, 120, 0.25);
+}
+
+.transport-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ---------- Status bar ---------- */
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 0.9rem;
+  letter-spacing: 0.14em;
+}
+
+.status-text {
+  color: var(--cyan);
+}
+
+.status-tag {
+  color: var(--text-dim);
+  font-size: 0.8rem;
+}
+
+/* ---------- Scrollbar (WebKit) ---------- */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--pink);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 520px) {
+  .vhs-screen {
+    padding: 18px 16px 24px;
+  }
+
+  .channel-row {
+    grid-template-columns: 44px 90px 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  .slider-wrap {
+    grid-column: 1 / -1;
+    padding: 0 4px;
+  }
+
+  .glitch-title {
+    font-size: 2rem;
+  }
+}

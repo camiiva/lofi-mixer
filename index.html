@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LOFI.MIXER</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/effects.css">
+</head>
+<body>
+
+  <!-- VHS overlay effects -->
+  <div class="scanlines" aria-hidden="true"></div>
+  <div class="vignette" aria-hidden="true"></div>
+  <div class="noise" aria-hidden="true"></div>
+
+  <main class="vhs-screen">
+
+    <!-- VHS Header bar -->
+    <header class="vhs-header">
+      <div class="header-left">
+        <span class="rec-indicator">
+          <span class="rec-dot"></span>REC
+        </span>
+        <span class="timestamp" id="timestamp">00:00</span>
+      </div>
+      <h1 class="glitch-title" data-text="LOFI.MIXER">LOFI.MIXER</h1>
+      <div class="header-right">
+        <span class="version-tag">VHS-01</span>
+      </div>
+    </header>
+
+    <!-- Divider -->
+    <div class="vhs-divider"></div>
+
+    <!-- Subtitle -->
+    <p class="subtitle">// BUILD YOUR VIBE //</p>
+
+    <!-- Channel Mixer -->
+    <section class="channels" aria-label="Audio mixer channels">
+
+      <!-- CH.1 AMBIANCE -->
+      <div class="channel-row" data-channel="ambiance">
+        <span class="ch-label">CH.1</span>
+        <span class="ch-name">AMBIANCE</span>
+        <select class="ch-select" id="select-ambiance" aria-label="Ambiance source">
+          <option value="rain">RAIN</option>
+          <option value="cafe">CAFE</option>
+          <option value="forest">FOREST</option>
+        </select>
+        <div class="slider-wrap">
+          <input type="range" class="ch-slider" id="vol-ambiance"
+            min="0" max="100" value="70"
+            aria-label="Ambiance volume"
+            style="--fill: 70%">
+        </div>
+      </div>
+
+      <!-- CH.2 BEATS -->
+      <div class="channel-row" data-channel="beats">
+        <span class="ch-label">CH.2</span>
+        <span class="ch-name">BEATS</span>
+        <select class="ch-select" id="select-beats" aria-label="Beats source">
+          <option value="lofi-hiphop">LO-FI HIP HOP</option>
+          <option value="boom-bap">BOOM BAP</option>
+          <option value="halftime">HALF TIME</option>
+          <option value="trap">TRAP</option>
+          <option value="jazz">JAZZ</option>
+          <option value="bossa-nova">BOSSA NOVA</option>
+          <option value="none">NONE</option>
+        </select>
+        <div class="slider-wrap">
+          <input type="range" class="ch-slider" id="vol-beats"
+            min="0" max="100" value="60"
+            aria-label="Beats volume"
+            style="--fill: 60%">
+        </div>
+      </div>
+
+      <!-- CH.3 TEXTURE -->
+      <div class="channel-row" data-channel="texture">
+        <span class="ch-label">CH.3</span>
+        <span class="ch-name">TEXTURE</span>
+        <select class="ch-select" id="select-texture" aria-label="Texture source">
+          <option value="vinyl-crackle">VINYL CRACKLE</option>
+          <option value="tape-hiss">TAPE HISS</option>
+          <option value="none">NONE</option>
+        </select>
+        <div class="slider-wrap">
+          <input type="range" class="ch-slider" id="vol-texture"
+            min="0" max="100" value="40"
+            aria-label="Texture volume"
+            style="--fill: 40%">
+        </div>
+      </div>
+
+      <!-- CH.4 INSTRUMENTAL -->
+      <div class="channel-row" data-channel="instrumental">
+        <span class="ch-label">CH.4</span>
+        <span class="ch-name">INSTRM.</span>
+        <select class="ch-select" id="select-instrumental" aria-label="Instrumental source">
+          <option value="none">NONE</option>
+          <option value="piano">LO-FI PIANO</option>
+          <option value="e-piano">E. PIANO</option>
+          <option value="pad">SYNTH PAD</option>
+          <option value="guitar">GUITAR</option>
+        </select>
+        <div class="slider-wrap">
+          <input type="range" class="ch-slider" id="vol-instrumental"
+            min="0" max="100" value="55"
+            aria-label="Instrumental volume"
+            style="--fill: 55%">
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div class="channel-divider"></div>
+
+      <!-- CH.5 WARMTH (low-pass filter) -->
+      <div class="channel-row channel-row--fx" data-channel="warmth">
+        <span class="ch-label">CH.5</span>
+        <span class="ch-name">WARMTH</span>
+        <span class="ch-select ch-select--label">LO-PASS FILTER</span>
+        <div class="slider-wrap">
+          <input type="range" class="ch-slider ch-slider--fx" id="warmth"
+            min="0" max="100" value="55"
+            aria-label="Warmth (low-pass filter)"
+            style="--fill: 55%">
+        </div>
+      </div>
+
+      <!-- CH.6 SPACE (reverb) -->
+      <div class="channel-row channel-row--fx" data-channel="space">
+        <span class="ch-label">CH.6</span>
+        <span class="ch-name">SPACE</span>
+        <span class="ch-select ch-select--label">REVERB WET</span>
+        <div class="slider-wrap">
+          <input type="range" class="ch-slider ch-slider--fx" id="space"
+            min="0" max="100" value="30"
+            aria-label="Space (reverb)"
+            style="--fill: 30%">
+        </div>
+      </div>
+
+      <!-- CH.7 BPM -->
+      <div class="channel-row channel-row--fx" data-channel="bpm">
+        <span class="ch-label">CH.7</span>
+        <span class="ch-name">BPM</span>
+        <span class="ch-select ch-select--label" id="bpm-display">75</span>
+        <div class="slider-wrap">
+          <input type="range" class="ch-slider ch-slider--fx" id="bpm"
+            min="55" max="110" value="75"
+            aria-label="Tempo (BPM)"
+            style="--fill: 36%">
+        </div>
+      </div>
+
+      <!-- CH.8 SWING -->
+      <div class="channel-row channel-row--fx" data-channel="swing">
+        <span class="ch-label">CH.8</span>
+        <span class="ch-name">SWING</span>
+        <span class="ch-select ch-select--label">GROOVE SHIFT</span>
+        <div class="slider-wrap">
+          <input type="range" class="ch-slider ch-slider--fx" id="swing"
+            min="0" max="66" value="0"
+            aria-label="Swing amount"
+            style="--fill: 0%">
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Divider -->
+    <div class="vhs-divider"></div>
+
+    <!-- Transport controls -->
+    <div class="transport">
+      <button class="transport-btn transport-btn--play" id="play-btn" aria-label="Play">
+        &#9654; PLAY
+      </button>
+      <button class="transport-btn transport-btn--stop" id="stop-btn" aria-label="Stop" disabled>
+        &#9632; STOP
+      </button>
+    </div>
+
+    <!-- Status bar -->
+    <div class="status-bar">
+      <span class="status-text" id="status-text">READY</span>
+      <span class="status-tag">// LOOP MODE: ON //</span>
+    </div>
+
+  </main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>
