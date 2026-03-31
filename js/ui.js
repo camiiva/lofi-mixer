@@ -101,6 +101,18 @@
         return;
       }
 
+      // Some iOS versions resolve Tone.start() but leave context suspended.
+      // Retry resume once before giving up.
+      if (Tone.context.state !== 'running') {
+        try { await Tone.context.resume(); } catch (_) {}
+      }
+
+      if (Tone.context.state !== 'running') {
+        setStatus('ERR: AUDIO BLOCKED — CHECK SILENT SWITCH');
+        playBtn.disabled = false;
+        return;
+      }
+
       setStatus('CTX:' + Tone.context.state + ' LOADING...');
 
       if (!audioReady) {

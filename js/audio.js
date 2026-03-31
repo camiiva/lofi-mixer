@@ -821,10 +821,9 @@ const AudioEngine = (() => {
     masterFilter = new Tone.Filter({ type: 'lowpass', frequency: warmthToFreq(55), rolloff: -12 });
 
     // Use a plain Gain as a pass-through — eliminates all reverb node overhead.
-    // Keeps the chain simple while we debug mobile audio.
     masterReverb = new Tone.Gain(1);
     masterFilter.chain(masterReverb);
-    masterReverb.connect(Tone.context.rawContext.destination);
+    masterReverb.toDestination();
 
     step('LOADING CHANNELS...');
     for (const [name, key] of Object.entries(sourceKeys)) {
@@ -848,7 +847,9 @@ const AudioEngine = (() => {
     // Tone.start() / AudioContext.resume() is handled by the caller
     // synchronously from the user-gesture handler before this is called.
     playing = true;
-    Tone.Transport.start();
+    Tone.Transport.bpm.value = params.bpm;
+    // Small offset (+0.1s) gives iOS time to fully resume before notes fire.
+    Tone.Transport.start('+0.1');
     for (const ch of Object.values(channels)) ch.synth?.start();
   }
 
