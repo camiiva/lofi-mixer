@@ -436,13 +436,13 @@ html, body {
   left: 0;
   right: 0;
   z-index: 100;
-  background: var(--bg);
-  border: 1px solid var(--pink);
+  background: var(--surface);
+  border: 2px solid var(--pink);
   list-style: none;
   display: none;
   box-shadow:
-    0 6px 20px rgba(255, 45, 120, 0.35),
-    0 0 0 1px rgba(255, 45, 120, 0.1);
+    0 0 12px rgba(255, 45, 120, 0.5),
+    0 8px 24px rgba(255, 45, 120, 0.3);
 }
 
 .custom-select-wrap.open .custom-select-options {
