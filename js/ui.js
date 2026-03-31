@@ -83,10 +83,28 @@
       return;
     }
 
-    // SYNCHRONOUS — iOS only grants Web Audio unlock during the synchronous
-    // part of a user-gesture handler. Call Tone.start() here (one context
-    // only — creating a second AudioContext in the same gesture can prevent
-    // iOS from unlocking Tone's context).
+    // SYNCHRONOUS — everything below must stay synchronous so iOS grants
+    // the Web Audio unlock within the user-gesture call stack.
+
+    // 1. Request iOS playback audio session (Safari 16.4+).
+    //    'playback' category means audio plays even with the silent switch on.
+    try {
+      if (navigator.audioSession) navigator.audioSession.type = 'playback';
+    } catch (_) {}
+
+    // 2. Classic iOS primer: play a 1-sample silent buffer synchronously.
+    //    This activates the hardware audio path before any async work runs.
+    try {
+      const _raw = Tone.context.rawContext;
+      const _buf = _raw.createBuffer(1, 1, _raw.sampleRate);
+      const _src = _raw.createBufferSource();
+      _src.buffer = _buf;
+      _src.connect(_raw.destination);
+      _src.start(0);
+    } catch (_) {}
+
+    // 3. Resume Tone.js context (one context only — creating a second can
+    //    prevent iOS from unlocking Tone's context).
     const toneReady = Tone.start();
 
     setStatus('UNLOCKING...');
@@ -108,12 +126,12 @@
       }
 
       if (Tone.context.state !== 'running') {
-        setStatus('ERR: AUDIO BLOCKED — CHECK SILENT SWITCH');
+        setStatus('ERR: CTX=' + Tone.context.state + ' CHECK SILENT SWITCH');
         playBtn.disabled = false;
         return;
       }
 
-      setStatus('CTX:' + Tone.context.state + ' LOADING...');
+      setStatus('LOADING CHANNELS...');
 
       if (!audioReady) {
         try {
