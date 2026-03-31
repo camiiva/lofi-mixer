@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=5">
+  <link rel="stylesheet" href="css/style.css?v=6">
   <link rel="stylesheet" href="css/effects.css">
   <link rel="icon" href="favicon.ico" type="image/x-icon">
 </head>
@@ -48,6 +48,7 @@
         <span class="ch-label">CH.1</span>
         <span class="ch-name">AMBIANCE</span>
         <select class="ch-select" id="select-ambiance" aria-label="Ambiance source">
+          <option value="none">NONE</option>
           <option value="rain">RAIN</option>
           <option value="cafe">CAFE</option>
           <option value="forest">FOREST</option>
@@ -75,9 +76,9 @@
         </select>
         <div class="slider-wrap">
           <input type="range" class="ch-slider" id="vol-beats"
-            min="0" max="100" value="60"
+            min="0" max="100" value="90"
             aria-label="Beats volume"
-            style="--fill: 60%">
+            style="--fill: 90%">
         </div>
       </div>
 
@@ -92,9 +93,9 @@
         </select>
         <div class="slider-wrap">
           <input type="range" class="ch-slider" id="vol-texture"
-            min="0" max="100" value="40"
+            min="0" max="100" value="10"
             aria-label="Texture volume"
-            style="--fill: 40%">
+            style="--fill: 10%">
         </div>
       </div>
 
@@ -106,7 +107,7 @@
           <option value="none">NONE</option>
           <option value="piano">LO-FI PIANO</option>
           <option value="e-piano">E. PIANO</option>
-          <option value="pad">SYNTH PAD</option>
+          <option value="pad" selected>SYNTH PAD</option>
           <option value="drift-pad">DRIFT PAD</option>
           <option value="pulse-pad">PULSE PAD</option>
           <option value="crystal-pad">CRYSTAL PAD</option>
@@ -114,9 +115,9 @@
         </select>
         <div class="slider-wrap">
           <input type="range" class="ch-slider" id="vol-instrumental"
-            min="0" max="100" value="55"
+            min="0" max="100" value="75"
             aria-label="Instrumental volume"
-            style="--fill: 55%">
+            style="--fill: 75%">
         </div>
       </div>
 
@@ -199,7 +200,7 @@
   </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
-  <script src="js/audio.js?v=4"></script>
-  <script src="js/ui.js?v=4"></script>
+  <script src="js/audio.js?v=6"></script>
+  <script src="js/ui.js?v=6"></script>
 </body>
 </html>

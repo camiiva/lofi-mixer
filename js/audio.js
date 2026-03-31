@@ -796,7 +796,7 @@ const AudioEngine = (() => {
   // ---------- Registry ----------
 
   const factories = {
-    ambiance: { rain: makeRainSynth, cafe: makeCafeSynth, forest: makeForestSynth },
+    ambiance: { none: null, rain: makeRainSynth, cafe: makeCafeSynth, forest: makeForestSynth },
     beats: {
       'lofi-hiphop': makeLoFiHipHopBeat,
       'boom-bap':    makeBoomBapBeat,
@@ -810,7 +810,7 @@ const AudioEngine = (() => {
     instrumental: { piano: makeLoFiPiano, 'e-piano': makeEPiano, pad: makeSynthPad, 'drift-pad': makeDriftPad, 'pulse-pad': makePulsePad, 'crystal-pad': makeCrystalPad, guitar: makePluckGuitar, none: null },
   };
 
-  const initialVolumes = { ambiance: 70, beats: 60, texture: 40, instrumental: 55 };
+  const initialVolumes = { ambiance: 70, beats: 90, texture: 10, instrumental: 75 };
 
   // ---------- Public API ----------
 
