@@ -73,7 +73,7 @@ const AudioEngine = (() => {
     const merge = new Tone.Gain(1);
 
     // Very-slow breath swell (imperceptible as modulation)
-    const breath = new Tone.LFO({ frequency: 0.018, min: 0.9, max: 1.0 }).start();
+    const breath = new Tone.LFO({ frequency: 0.018, min: 0.9, max: 1.0 });
     breath.connect(merge.gain);
 
     rumble.chain(rumbleF, rumbleG, merge);
@@ -82,8 +82,8 @@ const AudioEngine = (() => {
 
     return {
       output: merge,
-      start()   { rumble.start(); body.start(); splash.start(); },
-      stop()    { rumble.stop();  body.stop();  splash.stop();  },
+      start()   { breath.start(); rumble.start(); body.start(); splash.start(); },
+      stop()    { breath.stop();  rumble.stop();  body.stop();  splash.stop();  },
       dispose() {
         breath.dispose();
         [rumble, body, splash, rumbleF, bodyF, splashF, rumbleG, bodyG, splashG, merge]
@@ -110,7 +110,7 @@ const AudioEngine = (() => {
     n3.chain(f3, g3, merge);
 
     // Slow conversational swell
-    const murmurLFO = new Tone.LFO({ frequency: 0.06, min: 0.75, max: 1.0 }).start();
+    const murmurLFO = new Tone.LFO({ frequency: 0.06, min: 0.75, max: 1.0 });
     murmurLFO.connect(merge.gain);
 
     // Soft cutlery clink (gentler than MetalSynth — noise envelope)
@@ -126,8 +126,8 @@ const AudioEngine = (() => {
 
     return {
       output: merge,
-      start()   { n1.start(); n2.start(); n3.start(); clinkNoise.start(); clinkLoop.start('+0'); },
-      stop()    { n1.stop();  n2.stop();  n3.stop();  clinkNoise.stop();  clinkLoop.stop(); },
+      start()   { murmurLFO.start(); n1.start(); n2.start(); n3.start(); clinkNoise.start(); clinkLoop.start('+0'); },
+      stop()    { murmurLFO.stop();  n1.stop();  n2.stop();  n3.stop();  clinkNoise.stop();  clinkLoop.stop(); },
       dispose() {
         murmurLFO.dispose(); clinkLoop.dispose();
         [n1,n2,n3,f1,f2,f3,g1,g2,g3,merge,clinkNoise,clinkEnv,clinkHi,clinkVol]
@@ -140,7 +140,7 @@ const AudioEngine = (() => {
     // Wind: low pink noise with very slow amplitude swell
     const wind   = new Tone.Noise('pink');
     const windF  = new Tone.Filter({ type: 'lowpass', frequency: 600, rolloff: -48 });
-    const windLFO = new Tone.LFO({ frequency: 0.025, min: 0.6, max: 1.0 }).start();
+    const windLFO = new Tone.LFO({ frequency: 0.025, min: 0.6, max: 1.0 });
     const windG  = new Tone.Volume(-4);
     wind.chain(windF, windG);
     windLFO.connect(windG.volume); // swell the gain, not the filter
@@ -181,8 +181,8 @@ const AudioEngine = (() => {
 
     return {
       output: merge,
-      start()   { wind.start(); stream.start(); birdLoop.start('+0'); },
-      stop()    { wind.stop();  stream.stop();  birdLoop.stop(); },
+      start()   { windLFO.start(); wind.start(); stream.start(); birdLoop.start('+0'); },
+      stop()    { windLFO.stop();  wind.stop();  stream.stop();  birdLoop.stop(); },
       dispose() {
         windLFO.dispose(); birdLoop.dispose();
         [wind, windF, windG, stream, streamF, streamG, merge, bird]
@@ -605,7 +605,7 @@ const AudioEngine = (() => {
     });
     synth.set({ detune: -12 }); // slightly flat = warmer
 
-    const chorus = new Tone.Chorus({ frequency: 1.2, delayTime: 4, depth: 0.28, wet: 0.38 }).start();
+    const chorus = new Tone.Chorus({ frequency: 1.2, delayTime: 4, depth: 0.28, wet: 0.38 });
     const merge  = new Tone.Gain(1);
     synth.chain(chorus, merge);
 
@@ -616,7 +616,7 @@ const AudioEngine = (() => {
 
     return {
       output: merge,
-      start()   { part.start(0); },
+      start()   { chorus.start(); part.start(0); },
       stop()    { part.stop(); },
       dispose() { part.dispose(); synth.dispose(); chorus.dispose(); merge.dispose(); },
     };
@@ -631,8 +631,8 @@ const AudioEngine = (() => {
     });
     synth.set({ detune: 6 });
 
-    const tremolo = new Tone.Tremolo({ frequency: 4.8, depth: 0.28, wet: 0.65 }).start();
-    const chorus  = new Tone.Chorus({ frequency: 0.7, delayTime: 3.5, depth: 0.2, wet: 0.3 }).start();
+    const tremolo = new Tone.Tremolo({ frequency: 4.8, depth: 0.28, wet: 0.65 });
+    const chorus  = new Tone.Chorus({ frequency: 0.7, delayTime: 3.5, depth: 0.2, wet: 0.3 });
     const merge   = new Tone.Gain(1);
     synth.chain(tremolo, chorus, merge);
 
@@ -643,7 +643,7 @@ const AudioEngine = (() => {
 
     return {
       output: merge,
-      start()   { part.start(0); },
+      start()   { tremolo.start(); chorus.start(); part.start(0); },
       stop()    { part.stop(); },
       dispose() { part.dispose(); synth.dispose(); tremolo.dispose(); chorus.dispose(); merge.dispose(); },
     };
@@ -657,7 +657,7 @@ const AudioEngine = (() => {
     });
 
     const filter = new Tone.Filter({ type: 'lowpass', frequency: 1100, Q: 0.4 });
-    const chorus = new Tone.Chorus({ frequency: 0.4, delayTime: 9, depth: 0.55, wet: 0.65 }).start();
+    const chorus = new Tone.Chorus({ frequency: 0.4, delayTime: 9, depth: 0.55, wet: 0.65 });
     const merge  = new Tone.Gain(1);
     synth.chain(filter, chorus, merge);
 
@@ -667,7 +667,7 @@ const AudioEngine = (() => {
 
     return {
       output: merge,
-      start()   { part.start(0); },
+      start()   { chorus.start(); part.start(0); },
       stop()    { part.stop(); },
       dispose() { part.dispose(); synth.dispose(); filter.dispose(); chorus.dispose(); merge.dispose(); },
     };
@@ -682,7 +682,7 @@ const AudioEngine = (() => {
       volume:      -6,
     });
 
-    const chorus = new Tone.Chorus({ frequency: 0.5, delayTime: 5.5, depth: 0.32, wet: 0.45 }).start();
+    const chorus = new Tone.Chorus({ frequency: 0.5, delayTime: 5.5, depth: 0.32, wet: 0.45 });
     const merge  = new Tone.Gain(1);
     pluck.chain(chorus, merge);
 
@@ -692,7 +692,7 @@ const AudioEngine = (() => {
 
     return {
       output: merge,
-      start()   { part.start(0); },
+      start()   { chorus.start(); part.start(0); },
       stop()    { part.stop(); },
       dispose() { part.dispose(); pluck.dispose(); chorus.dispose(); merge.dispose(); },
     };
