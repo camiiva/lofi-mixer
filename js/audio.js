@@ -740,9 +740,10 @@ const AudioEngine = (() => {
     initialized = true;
   }
 
-  async function play() {
+  function play() {
     if (!initialized) return;
-    await Tone.start();
+    // Tone.start() / AudioContext.resume() is handled by the caller
+    // synchronously from the user-gesture handler before this is called.
     playing = true;
     Tone.Transport.start();
     for (const ch of Object.values(channels)) ch.synth?.start();

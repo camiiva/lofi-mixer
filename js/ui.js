@@ -4,7 +4,7 @@
  * Handles: timestamp, REC blink, glitch triggers, slider fill updates.
  */
 
-(async () => {
+(() => {
 
   // ---------- Element refs ----------
   const playBtn     = document.getElementById('play-btn');
@@ -15,36 +15,31 @@
   const glitchTitle = document.querySelector('.glitch-title');
   const channelRows = document.querySelectorAll('.channel-row');
 
-  const volAmbiance  = document.getElementById('vol-ambiance');
-  const volBeats     = document.getElementById('vol-beats');
-  const volTexture   = document.getElementById('vol-texture');
-  const warmthSlider = document.getElementById('warmth');
-  const spaceSlider  = document.getElementById('space');
-  const bpmSlider    = document.getElementById('bpm');
-  const bpmDisplay   = document.getElementById('bpm-display');
-  const swingSlider  = document.getElementById('swing');
+  const volAmbiance     = document.getElementById('vol-ambiance');
+  const volBeats        = document.getElementById('vol-beats');
+  const volTexture      = document.getElementById('vol-texture');
+  const volInstrumental = document.getElementById('vol-instrumental');
+  const warmthSlider    = document.getElementById('warmth');
+  const spaceSlider     = document.getElementById('space');
+  const bpmSlider       = document.getElementById('bpm');
+  const bpmDisplay      = document.getElementById('bpm-display');
+  const swingSlider     = document.getElementById('swing');
 
-  const selectAmbiance      = document.getElementById('select-ambiance');
-  const selectBeats         = document.getElementById('select-beats');
-  const selectTexture       = document.getElementById('select-texture');
-  const selectInstrumental  = document.getElementById('select-instrumental');
-  const volInstrumental     = document.getElementById('vol-instrumental');
+  const selectAmbiance     = document.getElementById('select-ambiance');
+  const selectBeats        = document.getElementById('select-beats');
+  const selectTexture      = document.getElementById('select-texture');
+  const selectInstrumental = document.getElementById('select-instrumental');
 
-  // ---------- Init audio engine ----------
-  const initialSources = {
-    ambiance:     selectAmbiance.value,
-    beats:        selectBeats.value,
-    texture:      selectTexture.value,
-    instrumental: selectInstrumental.value,
-  };
+  // ---------- State ----------
+  let audioReady = false;
 
-  setStatus('INITIALIZING...');
-  try {
-    await AudioEngine.init(initialSources);
-    setStatus('READY');
-  } catch (e) {
-    setStatus('ERR: AUDIO INIT');
-    console.error('[ui] init error:', e);
+  function currentSources() {
+    return {
+      ambiance:     selectAmbiance.value,
+      beats:        selectBeats.value,
+      texture:      selectTexture.value,
+      instrumental: selectInstrumental.value,
+    };
   }
 
   // ---------- Timestamp counter ----------
@@ -54,10 +49,7 @@
   function startTick() {
     seconds = 0;
     updateTimestamp();
-    tickInterval = setInterval(() => {
-      seconds++;
-      updateTimestamp();
-    }, 1000);
+    tickInterval = setInterval(() => { seconds++; updateTimestamp(); }, 1000);
   }
 
   function stopTick() {
@@ -74,30 +66,46 @@
   }
 
   // ---------- REC indicator ----------
-  function startRec() {
-    recDot.classList.add('blink');
-  }
-
-  function stopRec() {
-    recDot.classList.remove('blink');
-  }
+  function startRec() { recDot.classList.add('blink'); }
+  function stopRec()  { recDot.classList.remove('blink'); }
 
   // ---------- Status text ----------
-  function setStatus(text) {
-    statusText.textContent = text;
-  }
+  function setStatus(text) { statusText.textContent = text; }
 
-  // ---------- Play / Stop ----------
-  playBtn.addEventListener('click', async () => {
-    await AudioEngine.play();
+  // ---------- Play ----------
+  playBtn.addEventListener('click', () => {
+    // Step 1: Unlock Web Audio synchronously — MUST be the first call,
+    // with no await before it. iOS only honours user-gesture trust here.
+    Tone.start();
+
     playBtn.disabled = true;
-    playBtn.classList.add('active');
-    stopBtn.disabled = false;
-    startTick();
-    startRec();
-    setStatus('PLAYING...');
+
+    const run = async () => {
+      if (!audioReady) {
+        setStatus('LOADING...');
+        try {
+          await AudioEngine.init(currentSources());
+          audioReady = true;
+        } catch (e) {
+          console.error('[ui] init failed:', e);
+          setStatus('ERR: INIT FAILED');
+          playBtn.disabled = false;
+          return;
+        }
+      }
+
+      AudioEngine.play();
+      playBtn.classList.add('active');
+      stopBtn.disabled = false;
+      startTick();
+      startRec();
+      setStatus('PLAYING...');
+    };
+
+    run();
   });
 
+  // ---------- Stop ----------
   stopBtn.addEventListener('click', () => {
     AudioEngine.stop();
     playBtn.disabled = false;
@@ -117,10 +125,10 @@
     });
   }
 
-  bindVolumeSlider(volAmbiance,      'ambiance');
-  bindVolumeSlider(volBeats,         'beats');
-  bindVolumeSlider(volTexture,       'texture');
-  bindVolumeSlider(volInstrumental,  'instrumental');
+  bindVolumeSlider(volAmbiance,     'ambiance');
+  bindVolumeSlider(volBeats,        'beats');
+  bindVolumeSlider(volTexture,      'texture');
+  bindVolumeSlider(volInstrumental, 'instrumental');
 
   // ---------- FX sliders ----------
   warmthSlider.addEventListener('input', () => {
@@ -135,16 +143,13 @@
     AudioEngine.setReverb(val);
   });
 
-  // BPM slider
   bpmSlider.addEventListener('input', () => {
     const val = Number(bpmSlider.value);
-    const pct = ((val - 55) / (110 - 55)) * 100;
-    bpmSlider.style.setProperty('--fill', `${pct}%`);
+    bpmSlider.style.setProperty('--fill', `${((val - 55) / 55) * 100}%`);
     bpmDisplay.textContent = val;
     AudioEngine.setBPM(val);
   });
 
-  // Swing slider
   swingSlider.addEventListener('input', () => {
     const val = Number(swingSlider.value);
     swingSlider.style.setProperty('--fill', `${(val / 66) * 100}%`);
@@ -153,8 +158,10 @@
 
   // ---------- Source selects ----------
   function bindSourceSelect(select, channelName) {
-    select.addEventListener('change', async () => {
-      await AudioEngine.setChannelSource(channelName, select.value);
+    select.addEventListener('change', () => {
+      // Only swap if audio is already running; otherwise the value is
+      // picked up naturally when init() runs on the next PLAY tap.
+      if (audioReady) AudioEngine.setChannelSource(channelName, select.value);
     });
   }
 
@@ -171,14 +178,9 @@
   }
 
   function scheduleNextGlitch() {
-    // Random interval: 3–12 seconds
     const delay = 3000 + Math.random() * 9000;
-    setTimeout(() => {
-      triggerTitleGlitch();
-      scheduleNextGlitch();
-    }, delay);
+    setTimeout(() => { triggerTitleGlitch(); scheduleNextGlitch(); }, delay);
   }
-
   scheduleNextGlitch();
 
   // ---------- Tracking glitch — random channel rows ----------
@@ -191,12 +193,8 @@
 
   function scheduleNextTracking() {
     const delay = 6000 + Math.random() * 14000;
-    setTimeout(() => {
-      triggerTrackingGlitch();
-      scheduleNextTracking();
-    }, delay);
+    setTimeout(() => { triggerTrackingGlitch(); scheduleNextTracking(); }, delay);
   }
-
   scheduleNextTracking();
 
 })();
