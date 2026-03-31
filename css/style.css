@@ -503,3 +503,15 @@ html, body {
     font-size: 2rem;
   }
 }
+
+@media (max-width: 420px) {
+  .header-left {
+    min-width: 100px;
+    gap: 10px;
+  }
+
+  .glitch-title {
+    font-size: 1.4rem;
+    letter-spacing: 0.07em;
+  }
+}
