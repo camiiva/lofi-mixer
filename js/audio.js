@@ -633,7 +633,7 @@ const AudioEngine = (() => {
     return {
       output: merge,
       start()   { chorus.start(); part.start(0); },
-      stop()    { part.stop(); },
+      stop()    { synth.releaseAll(); part.stop(); chorus.stop(); },
       dispose() { part.dispose(); synth.dispose(); chorus.dispose(); merge.dispose(); },
     };
   }
@@ -660,7 +660,7 @@ const AudioEngine = (() => {
     return {
       output: merge,
       start()   { tremolo.start(); chorus.start(); part.start(0); },
-      stop()    { part.stop(); },
+      stop()    { synth.releaseAll(); part.stop(); tremolo.stop(); chorus.stop(); },
       dispose() { part.dispose(); synth.dispose(); tremolo.dispose(); chorus.dispose(); merge.dispose(); },
     };
   }
@@ -684,7 +684,7 @@ const AudioEngine = (() => {
     return {
       output: merge,
       start()   { chorus.start(); part.start(0); },
-      stop()    { part.stop(); },
+      stop()    { synth.releaseAll(); part.stop(); chorus.stop(); },
       dispose() { part.dispose(); synth.dispose(); filter.dispose(); chorus.dispose(); merge.dispose(); },
     };
   }
@@ -711,7 +711,7 @@ const AudioEngine = (() => {
     return {
       output: merge,
       start()   { autoFilter.start(); chorus.start(); part.start(0); },
-      stop()    { part.stop(); },
+      stop()    { synth.releaseAll(); part.stop(); autoFilter.stop(); chorus.stop(); },
       dispose() { part.dispose(); synth.dispose(); autoFilter.dispose(); chorus.dispose(); merge.dispose(); },
     };
   }
@@ -737,7 +737,7 @@ const AudioEngine = (() => {
     return {
       output: merge,
       start()   { tremolo.start(); chorus.start(); part.start(0); },
-      stop()    { part.stop(); },
+      stop()    { synth.releaseAll(); part.stop(); tremolo.stop(); chorus.stop(); },
       dispose() { part.dispose(); synth.dispose(); filter.dispose(); tremolo.dispose(); chorus.dispose(); merge.dispose(); },
     };
   }
@@ -763,7 +763,7 @@ const AudioEngine = (() => {
     return {
       output: merge,
       start()   { chorus.start(); part.start(0); },
-      stop()    { part.stop(); },
+      stop()    { synth.releaseAll(); part.stop(); chorus.stop(); },
       dispose() { part.dispose(); synth.dispose(); delay.dispose(); chorus.dispose(); merge.dispose(); },
     };
   }
@@ -788,7 +788,7 @@ const AudioEngine = (() => {
     return {
       output: merge,
       start()   { chorus.start(); part.start(0); },
-      stop()    { part.stop(); },
+      stop()    { part.stop(); chorus.stop(); },
       dispose() { part.dispose(); pluck.dispose(); chorus.dispose(); merge.dispose(); },
     };
   }

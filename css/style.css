@@ -11,14 +11,14 @@
 }
 
 :root {
-  --bg:        #080810;
-  --surface:   #0d0d1a;
-  --border:    #1a1a38;
-  --pink:      #ff2d78;
-  --cyan:      #00fff0;
-  --green:     #c8ff00;
-  --text:      #e8e8ff;
-  --text-dim:  #7878a8;
+  --bg:        #070010;
+  --surface:   #0f0022;
+  --border:    #1e0042;
+  --pink:      #e8006e;
+  --cyan:      #00aaff;
+  --green:     #ff6a00;
+  --text:      #eedaff;
+  --text-dim:  #6852a8;
   --font:      'VT323', monospace;
 }
 
@@ -32,9 +32,18 @@ html, body {
   overflow-x: hidden;
 }
 
+/* ---------- Grid canvas ---------- */
+#grid-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
 /* ---------- Screen wrapper ---------- */
 .vhs-screen {
   position: relative;
+  z-index: 1;
   max-width: 680px;
   margin: 0 auto;
   padding: 28px 32px 32px;
@@ -219,7 +228,7 @@ html, body {
   cursor: pointer;
   width: 100%;
   /* Custom arrow using SVG */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath fill='%23ff2d78' d='M0 0l6 8 6-8z'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath fill='%23e8006e' d='M0 0l6 8 6-8z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 8px center;
   outline: none;
@@ -344,7 +353,7 @@ html, body {
 .transport-btn--play.active {
   background: var(--green);
   color: var(--bg);
-  box-shadow: 0 0 18px var(--green), 0 0 40px rgba(200, 255, 0, 0.25);
+  box-shadow: 0 0 18px var(--green), 0 0 40px rgba(255, 106, 0, 0.25);
 }
 
 .transport-btn--stop {
@@ -355,7 +364,7 @@ html, body {
 .transport-btn--stop:hover:not(:disabled) {
   background: var(--pink);
   color: var(--bg);
-  box-shadow: 0 0 18px var(--pink), 0 0 40px rgba(255, 45, 120, 0.25);
+  box-shadow: 0 0 18px var(--pink), 0 0 40px rgba(232, 0, 110, 0.25);
 }
 
 .transport-btn:disabled {
@@ -409,12 +418,12 @@ html, body {
 
 .custom-select-trigger:hover {
   border-color: var(--cyan);
-  box-shadow: 0 0 6px rgba(0, 255, 240, 0.5);
+  box-shadow: 0 0 6px rgba(0, 170, 255, 0.5);
 }
 
 .custom-select-wrap.open .custom-select-trigger {
   border-color: var(--cyan);
-  box-shadow: 0 0 8px rgba(0, 255, 240, 0.6);
+  box-shadow: 0 0 8px rgba(0, 170, 255, 0.6);
 }
 
 .custom-select-arrow {
@@ -441,8 +450,8 @@ html, body {
   list-style: none;
   display: none;
   box-shadow:
-    0 0 12px rgba(255, 45, 120, 0.5),
-    0 8px 24px rgba(255, 45, 120, 0.3);
+    0 0 12px rgba(232, 0, 110, 0.5),
+    0 8px 24px rgba(232, 0, 110, 0.3);
 }
 
 .custom-select-wrap.open .custom-select-options {
@@ -464,7 +473,7 @@ html, body {
 }
 
 .custom-select-option:hover {
-  background: rgba(255, 45, 120, 0.12);
+  background: rgba(232, 0, 110, 0.12);
   color: var(--pink);
 }
 

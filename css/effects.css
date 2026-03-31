@@ -83,12 +83,12 @@ body {
 }
 
 .glitch-title::before {
-  color: #ff2d78;
+  color: #e8006e;
   left: -2px;
 }
 
 .glitch-title::after {
-  color: #00fff0;
+  color: #00aaff;
   left: 2px;
 }
 
@@ -149,8 +149,8 @@ body {
 }
 
 @keyframes play-pulse {
-  0%, 100% { box-shadow: 0 0 18px var(--green), 0 0 40px rgba(200, 255, 0, 0.25); }
-  50%       { box-shadow: 0 0 28px var(--green), 0 0 60px rgba(200, 255, 0, 0.4); }
+  0%, 100% { box-shadow: 0 0 18px var(--green), 0 0 40px rgba(255, 106, 0, 0.25); }
+  50%       { box-shadow: 0 0 28px var(--green), 0 0 60px rgba(255, 106, 0, 0.4); }
 }
 
 /* ---------- VHS header shimmer line ---------- */
